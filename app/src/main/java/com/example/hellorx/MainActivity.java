@@ -1,6 +1,7 @@
 package com.example.hellorx;
 
 import android.os.Bundle;
+import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
@@ -10,7 +11,6 @@ import com.example.hellorx.model.PixaBay;
 import com.example.hellorx.model.Quote;
 import com.example.hellorx.service.API;
 import com.squareup.picasso.Picasso;
-import com.trello.rxlifecycle.components.support.RxAppCompatActivity;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
@@ -19,7 +19,7 @@ import rx.android.schedulers.AndroidSchedulers;
 import rx.functions.Func1;
 import rx.schedulers.Schedulers;
 
-public class MainActivity extends RxAppCompatActivity {
+public class MainActivity extends AppCompatActivity {
     private static final String TAG = MainActivity.class.getSimpleName();
 
     public static final String CATEGORY_MOVIES = "movies";
@@ -35,16 +35,6 @@ public class MainActivity extends RxAppCompatActivity {
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
         getQuote();
-    }
-
-    @Override
-    public void onResume() {
-        super.onResume();
-    }
-
-    @Override
-    public void onPause() {
-        super.onPause();
     }
 
     @Override
