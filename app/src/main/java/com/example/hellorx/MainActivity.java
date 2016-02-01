@@ -52,32 +52,36 @@ public class MainActivity extends AppCompatActivity {
         API.quote().getQuote(CATEGORY_FAMOUS)
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
-            .doOnNext(quote -> {
-                mQuoteTextView.setText(quote.getQuote());
-                mQuoteAuthor.setText(quote.getAuthor());
-            })
-            .flatMap(quote ->
-                    API.image().getPhoto(quote.getAuthor())
-                        .subscribeOn(Schedulers.io())
-                        .observeOn(AndroidSchedulers.mainThread())
-            )
-            .subscribe(image -> {
-                if (image != null && image.getTotalImages() > 0) {
-                    mQuoteImage.setVisibility(View.VISIBLE);
-                    Picasso.with(getBaseContext())
-                        .load(image.getImages().get(0).getImageURL())
-                        .fit()
-                        .centerCrop()
-                        .noFade()
-                        .into(mQuoteImage);
-                }
-                else {
-                    mQuoteImage.setVisibility(View.GONE);
-                }
-            }, e -> {
-                mQuoteImage.setVisibility(View.GONE);
-                Log.e(TAG, e.getMessage());
-            });
+            .doOnNext(this::updateQuoteView)
+            .flatMap(quote -> API.image().getPhoto(quote.getAuthor())
+                .subscribeOn(Schedulers.io())
+                .observeOn(AndroidSchedulers.mainThread()))
+            .subscribe(this::showQuoteImage, this::hideQuoteImage);
+    }
+
+    private void updateQuoteView(Quote quote) {
+        mQuoteTextView.setText(quote.getQuote());
+        mQuoteAuthor.setText(quote.getAuthor());
+    }
+
+    private void hideQuoteImage(Throwable e) {
+        mQuoteImage.setVisibility(View.GONE);
+        Log.e(TAG, e.getMessage());
+    }
+
+    private void showQuoteImage(PixaBay image) {
+        if (image != null && image.getTotalImages() > 0) {
+            mQuoteImage.setVisibility(View.VISIBLE);
+            Picasso.with(getBaseContext())
+                .load(image.getImages().get(0).getImageURL())
+                .fit()
+                .centerCrop()
+                .noFade()
+                .into(mQuoteImage);
+        }
+        else {
+            mQuoteImage.setVisibility(View.GONE);
+        }
     }
 
     private void getQuoteCombind() {
@@ -93,8 +97,7 @@ public class MainActivity extends AppCompatActivity {
             .subscribeOn(Schedulers.io())
             .observeOn(AndroidSchedulers.mainThread())
             .subscribe(quote -> {
-                mQuoteTextView.setText(quote.getQuote());
-                mQuoteAuthor.setText(quote.getAuthor());
+                updateQuoteView(quote);
 
                 if (quote.getAuthorImage() != null) {
                     mQuoteImage.setVisibility(View.VISIBLE);
@@ -107,10 +110,7 @@ public class MainActivity extends AppCompatActivity {
                 else {
                     mQuoteImage.setVisibility(View.GONE);
                 }
-            }, e -> {
-                mQuoteImage.setVisibility(View.GONE);
-                Log.e(TAG, e.getMessage());
-            });
+            }, this::hideQuoteImage);
     }
 }
 
