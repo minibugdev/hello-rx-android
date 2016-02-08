@@ -1,7 +1,6 @@
 package com.example.hellorx;
 
 import android.os.Bundle;
-import android.support.v7.app.AppCompatActivity;
 import android.util.Log;
 import android.view.View;
 import android.widget.ImageView;
@@ -9,17 +8,15 @@ import android.widget.TextView;
 
 import com.example.hellorx.model.PixaBay;
 import com.example.hellorx.model.Quote;
-import com.example.hellorx.service.API;
+import com.example.hellorx.data.DataManager;
 import com.squareup.picasso.Picasso;
+import com.trello.rxlifecycle.components.support.RxAppCompatActivity;
 
 import butterknife.Bind;
 import butterknife.ButterKnife;
 import butterknife.OnClick;
-import rx.android.schedulers.AndroidSchedulers;
-import rx.functions.Func1;
-import rx.schedulers.Schedulers;
 
-public class MainActivity extends AppCompatActivity {
+public class MainActivity extends RxAppCompatActivity {
     private static final String TAG = MainActivity.class.getSimpleName();
 
     public static final String CATEGORY_MOVIES = "movies";
@@ -29,11 +26,16 @@ public class MainActivity extends AppCompatActivity {
     @Bind(R.id.quote_author)   TextView  mQuoteAuthor;
     @Bind(R.id.quote_image)    ImageView mQuoteImage;
 
+    private DataManager mDataManager;
+
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
         ButterKnife.bind(this);
+
+        mDataManager = new DataManager();
+
         getQuote();
     }
 
@@ -49,13 +51,10 @@ public class MainActivity extends AppCompatActivity {
     }
 
     private void getQuote() {
-        API.quote().getQuote(CATEGORY_FAMOUS)
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
+        mDataManager.getQuote(CATEGORY_FAMOUS)
             .doOnNext(this::updateQuoteView)
-            .flatMap(quote -> API.image().getPhoto(quote.getAuthor())
-                .subscribeOn(Schedulers.io())
-                .observeOn(AndroidSchedulers.mainThread()))
+            .flatMap(quote -> mDataManager.getPhoto(quote.getAuthor()))
+            .compose(bindToLifecycle())
             .subscribe(this::showQuoteImage, this::hideQuoteImage);
     }
 
@@ -82,35 +81,6 @@ public class MainActivity extends AppCompatActivity {
         else {
             mQuoteImage.setVisibility(View.GONE);
         }
-    }
-
-    private void getQuoteCombind() {
-        API.quote().getQuote(CATEGORY_FAMOUS)
-            .flatMap(quote -> API.image().getPhoto(quote.getAuthor())
-                    .map((Func1<PixaBay, Quote>) pixaBay -> {
-                        if (pixaBay.getTotalImages() > 0) {
-                            quote.setAuthorImage(pixaBay.getImages().get(0));
-                        }
-                        return quote;
-                    })
-            )
-            .subscribeOn(Schedulers.io())
-            .observeOn(AndroidSchedulers.mainThread())
-            .subscribe(quote -> {
-                updateQuoteView(quote);
-
-                if (quote.getAuthorImage() != null) {
-                    mQuoteImage.setVisibility(View.VISIBLE);
-                    Picasso.with(getBaseContext())
-                        .load(quote.getAuthorImage().getImageURL())
-                        .fit()
-                        .centerCrop()
-                        .into(mQuoteImage);
-                }
-                else {
-                    mQuoteImage.setVisibility(View.GONE);
-                }
-            }, this::hideQuoteImage);
     }
 }
 
