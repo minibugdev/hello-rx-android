@@ -6,8 +6,9 @@ Let's start Android project with **RXJava** and **Retrolambda** to call API to g
 ### Libraries
 - <a href="https://github.com/ReactiveX/RxJava" target="_blank">RxJava</a>
 - <a href="https://github.com/ReactiveX/RxAndroid" target="_blank">RxAndroid</a>
+- <a href="https://github.com/trello/RxLifecycle" target="_blank">RxLifecycle</a>
 - <a href="https://github.com/evant/gradle-retrolambda" target="_blank">Retrolambda</a>
-- <a href="https://github.com/square/retrofit/" target="_blank">Retrofit</a>
-- <a href="https://github.com/square/okhttp" target="_blank">OkHttp</a>
+- <a href="https://github.com/square/retrofit/" target="_blank">Retrofit2</a>
+- <a href="https://github.com/square/okhttp" target="_blank">OkHttp3</a>
 - <a href="https://github.com/JakeWharton/butterknife" target="_blank">Butterknife</a>
 - <a href="https://github.com/square/picasso" target="_blank">Picasso</a>
